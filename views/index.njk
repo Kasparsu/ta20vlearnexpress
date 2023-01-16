@@ -1,0 +1,9 @@
+{% extends 'partials/layout.njk' %}
+{% block content %}
+    Hello HTML!
+    <ul>
+        {% for item in [1,2,3,4,5] %}
+            <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
