@@ -2,8 +2,8 @@
 {% block content %}
     Hello HTML!
     <ul>
-        {% for item in [1,2,3,4,5] %}
-            <li>{{ item }}</li>
+        {% for user in users %}
+            <li>{{ user.name }}</li>
         {% endfor %}
     </ul>
 {% endblock %}
