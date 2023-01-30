@@ -8,7 +8,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 dotenv.config();
 const app = express();
-
+app.use(express.static('public'));
 app.set('views', './views');
 //app.set('trust proxy', 1);
 
@@ -32,6 +32,10 @@ import publicRoutes from './src/controllers/PublicController.js';
 
 app.use('/', publicRoutes);
 
+
+import authRoutes from './src/controllers/AuthController.js';
+
+app.use('/', authRoutes);
 
 // middleware after
 import clearFlashMessages from './src/middlewares/ClearFlashMessages.js';
