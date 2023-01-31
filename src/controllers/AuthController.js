@@ -48,13 +48,45 @@ router.post('/login', async (req, res, next) => {
         where: { email: req.body.email },
         data: { loginToken: hash.toString() },
     });
-   
-    res.redirect('/email')
+    req.session.login = {
+        token: hash.toString(),
+    }
+    req.session.save();
+    console.log(req.session);
+    res.redirect('/email');
     next();
 });
 
-router.get('/email', (req, res, next) => {
-    res.render('email.njk');
+router.get('/emaillogin', async (req, res, next) => {
+    const user = await prisma.user.update({
+        where: { loginToken: req.query.token },
+        data: { shouldLogIn: true },
+    });
+    
+    res.render('loggedin.njk');
+    next();
+});
+
+router.get('/email', async (req, res, next) => {
+    console.log(req.session);
+    if(req.session.login){
+        const user = await prisma.user.findFirst({
+            where: { loginToken: req.session.login.token, shouldLogIn: true},
+        });
+        console.log(user);
+        if(user){
+            req.session.user = user;
+            await prisma.user.update({
+                where: { loginToken: req.session.login.token },
+                data: { shouldLogIn: false, loginToken: null },
+            });
+            res.redirect('/');
+        } else {
+            res.render('email.njk');
+        }
+    } else {
+        res.render('email.njk');
+    }
     next();
 });
 export default router;
