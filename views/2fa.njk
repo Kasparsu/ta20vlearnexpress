@@ -1,0 +1,15 @@
+{% extends 'partials/layout.njk' %}
+{% block content %}
+<div class="card bg-base-200"> 
+    <div class="card-body mx-auto">
+       <form action="/2fa" method="POST">
+            <p>Scan QR and enter code </p>
+            <img src="{{ qr }}">
+            <input type="text" name="code" placeholder="Code" class="input w-full max-w-xs">
+            <div>
+            <input type="submit" value="Submit" class="btn btn-primary mt-3">
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
