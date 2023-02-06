@@ -6,6 +6,8 @@ import nunjucks from 'nunjucks';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import jwt from 'jwt-express';
+
 dotenv.config();
 const app = express();
 app.use(express.static('public'));
@@ -15,7 +17,9 @@ app.set('views', './views');
 app.use(session({
   secret: process.env.SESSION_SECRET,
 }));
+
 app.use(cookieParser());
+app.use(jwt.init('secret'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 

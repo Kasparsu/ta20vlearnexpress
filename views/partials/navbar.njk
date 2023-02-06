@@ -37,8 +37,11 @@
       <li><a>Item 3</a></li>
     </ul> #}
   </div>
+  
   <div class="navbar-end">
-    <a class="btn btn-primary" href="/login">Login</a>
-    <a class="btn btn-secondary" href="/register">Register</a>
+    {% if(req.auth == undefined) %}
+      <a class="btn btn-primary" href="/login">Login</a>
+      <a class="btn btn-secondary" href="/register">Register</a>
+    {% endif %}
   </div>
 </div>

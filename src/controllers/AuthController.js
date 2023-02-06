@@ -5,6 +5,9 @@ const prisma = new PrismaClient();
 //import CryptoJS from "crypto-js";
 import {authenticator} from 'otplib';
 import qrCode from 'qrcode';
+import jwt from 'jwt-express';
+
+//import jwt from 'jsonwebtoken';
 router.get('/register', (req, res, next) => {
     res.render('register.njk');
     next();
@@ -54,6 +57,41 @@ router.get('/2fa', (req, res, next) => {
     next();
 });
 
+router.post('/2fa', async (req, res, next) => {
+    const user = await prisma.user.findFirst({
+        where: { email: req.session.email },
+    });
+    if(user && authenticator.check(req.body.code, user.secret)){
+        req.session.qr = null;
+        //req.session.token = jwt.sign(req.session.email, 'supersecret');
+        res.jwt({
+            user
+        });
+        req.session.email = null;
+        res.redirect('/dashboard');
+    } else {
+        /**  
+         * @todo user might not exist either
+         */
+        req.session.error = {
+            message: 'invalid code',
+            field: 'code'
+        }
+        res.redirect('/2fa');
+    }
+
+    next();
+});
+
+/**  
+ * @todo move this to its own controller
+ */
+router.get('/dashboard', jwt.valid(), (req, res, next) => {
+    console.log(req.session);
+    console.log(req.auth);
+    res.render('dashboard.njk', {email: req.auth});
+    next();
+});
 
 
 router.get('/login', (req, res, next) => {
@@ -63,52 +101,26 @@ router.get('/login', (req, res, next) => {
 });
 
 router.post('/login', async (req, res, next) => {
-    
-    let hash = CryptoJS.HmacSHA1(new Date().toISOString(), "asdasd");
-    console.log(hash.toString());
-    const user = await prisma.user.update({
+    console.log(req.body);
+    const user = await prisma.user.findFirst({
         where: { email: req.body.email },
-        data: { loginToken: hash.toString() },
     });
-    req.session.login = {
-        token: hash.toString(),
-    }
-    req.session.save();
-    console.log(req.session);
-    res.redirect('/email');
-    next();
-});
-
-router.get('/emaillogin', async (req, res, next) => {
-    const user = await prisma.user.update({
-        where: { loginToken: req.query.token },
-        data: { shouldLogIn: true },
-    });
-    
-    res.render('loggedin.njk');
-    next();
-});
-
-router.get('/email', async (req, res, next) => {
-    console.log(req.session);
-    if(req.session.login){
-        const user = await prisma.user.findFirst({
-            where: { loginToken: req.session.login.token, shouldLogIn: true},
+    if(user && authenticator.check(req.body.code, user.secret)){
+        res.jwt({
+            user
         });
-        console.log(user);
-        if(user){
-            req.session.user = user;
-            await prisma.user.update({
-                where: { loginToken: req.session.login.token },
-                data: { shouldLogIn: false, loginToken: null },
-            });
-            res.redirect('/');
-        } else {
-            res.render('email.njk');
-        }
+        res.redirect('/dashboard');
     } else {
-        res.render('email.njk');
+        /**  
+         * @todo user might not exist either
+         */
+        req.session.error = {
+            message: 'invalid code',
+            field: 'code'
+        }
+        res.redirect('/2fa');
     }
     next();
 });
+
 export default router;
