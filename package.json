@@ -7,7 +7,10 @@
   "scripts": {
     "start": "nodemon -e js,njk",
     "asset": "tailwindcss -i ./assets/css/style.css -o ./public/style.css",
-    "watch": "tailwindcss -i ./assets/css/style.css -o ./public/style.css --watch"
+    "watch": "tailwindcss -i ./assets/css/style.css -o ./public/style.css --watch",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +34,9 @@
   },
   "devDependencies": {
     "prisma": "^4.8.1",
-    "tailwindcss": "^3.2.4"
+    "tailwindcss": "^3.2.4",
+    "@sveltejs/vite-plugin-svelte": "^2.0.2",
+    "svelte": "^3.55.1",
+    "vite": "^4.1.0"
   }
 }
