@@ -3,11 +3,10 @@ const router = express.Router();
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-router.get('/', async (req, res, next) => {
+router.get('/', async (req, res) => {
     const users = await prisma.user.findMany();
     await prisma.$disconnect();
-    res.render('index.njk', { users });
-    next();
+    return res.render('index.njk', { users });
 });
  
 export default router;

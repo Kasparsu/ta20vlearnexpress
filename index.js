@@ -7,6 +7,7 @@ import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import jwt from 'jwt-express';
+import ViteExpress from "vite-express";
 
 dotenv.config();
 const app = express();
@@ -45,6 +46,6 @@ app.use('/', authRoutes);
 import clearFlashMessages from './src/middlewares/ClearFlashMessages.js';
 app.use(clearFlashMessages);
 
-app.listen(process.env.PORT, () => {
+ViteExpress.listen(app, process.env.PORT, () => {
   console.log(`Example app running on http://localhost:${process.env.PORT}`);
 });

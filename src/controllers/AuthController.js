@@ -8,12 +8,11 @@ import qrCode from 'qrcode';
 import jwt from 'jwt-express';
 
 //import jwt from 'jsonwebtoken';
-router.get('/register', (req, res, next) => {
-    res.render('register.njk');
-    next();
+router.get('/register', (req, res) => {
+   return res.render('register.njk');
 });
 
-router.post('/register', async (req, res, next) => {
+router.post('/register', async (req, res) => {
     const secret = authenticator.generateSecret();
     try {
         const user = await prisma.user.create({
@@ -33,7 +32,7 @@ router.post('/register', async (req, res, next) => {
             req.session.message = 'User Created successfully';
             req.session.save();
         });
-        res.redirect('/2fa');
+        return res.redirect('/2fa');
     } catch (e) {
         let error = {
             message: e.message.match(/Unique constraint failed on the fields: \(`\w+`\)/g),
@@ -43,21 +42,19 @@ router.post('/register', async (req, res, next) => {
             req.session.error = error;
             req.session.save();
         }
-        res.redirect('/register')
+        return res.redirect('/register')
     }
-    next();
 });
 
-router.get('/2fa', (req, res, next) => {
+router.get('/2fa', (req, res) => {
     if(!req.session.qr){
-        res.redirect('/');
+        return res.redirect('/');
     } else {
-        res.render('2fa.njk', {qr: req.session.qr});
+        return res.render('2fa.njk', {qr: req.session.qr});
     }
-    next();
 });
 
-router.post('/2fa', async (req, res, next) => {
+router.post('/2fa', async (req, res) => {
     const user = await prisma.user.findFirst({
         where: { email: req.session.email },
     });
@@ -68,7 +65,7 @@ router.post('/2fa', async (req, res, next) => {
             user
         });
         req.session.email = null;
-        res.redirect('/dashboard');
+        return res.redirect('/dashboard');
     } else {
         /**  
          * @todo user might not exist either
@@ -77,30 +74,24 @@ router.post('/2fa', async (req, res, next) => {
             message: 'invalid code',
             field: 'code'
         }
-        res.redirect('/2fa');
+        return res.redirect('/2fa');
     }
-
-    next();
 });
 
 /**  
  * @todo move this to its own controller
  */
-router.get('/dashboard', jwt.valid(), (req, res, next) => {
-    console.log(req.session);
-    console.log(req.auth);
-    res.render('dashboard.njk', {email: req.auth});
-    next();
-});
-
-
-router.get('/login', (req, res, next) => {
+router.get('/dashboard', jwt.valid(), (req, res) => {
+    return res.render('dashboard.njk', {email: req.auth});
     
-    res.render('login.njk');
-    next();
 });
 
-router.post('/login', async (req, res, next) => {
+
+router.get('/login', (req, res) => {
+    return res.render('login.njk');
+});
+
+router.post('/login', async (req, res) => {
     console.log(req.body);
     const user = await prisma.user.findFirst({
         where: { email: req.body.email },
@@ -109,7 +100,7 @@ router.post('/login', async (req, res, next) => {
         res.jwt({
             user
         });
-        res.redirect('/dashboard');
+        return res.redirect('/dashboard');
     } else {
         /**  
          * @todo user might not exist either
@@ -118,9 +109,8 @@ router.post('/login', async (req, res, next) => {
             message: 'invalid code',
             field: 'code'
         }
-        res.redirect('/2fa');
+        return res.redirect('/2fa');
     }
-    next();
 });
 
 export default router;
