@@ -42,6 +42,10 @@ import authRoutes from './src/controllers/AuthController.js';
 
 app.use('/', authRoutes);
 
+import messagesRoutes from './src/controllers/MessageController.js';
+
+app.use('/messages/', messagesRoutes);
+
 // middleware after
 import clearFlashMessages from './src/middlewares/ClearFlashMessages.js';
 app.use(clearFlashMessages);

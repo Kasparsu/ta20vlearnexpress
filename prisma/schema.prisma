@@ -17,6 +17,16 @@ model User {
   name  String?
   secret String
   posts Post[]
+  messages Message[]
+}
+
+model Message {
+  @@map("messages")
+  id    Int     @id @default(autoincrement())
+  message String
+  timestamp DateTime
+  user  User    @relation(fields: [userId], references: [id])
+  userId Int
 }
 
 model Post {
