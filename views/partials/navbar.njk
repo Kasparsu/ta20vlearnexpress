@@ -39,7 +39,7 @@
   </div>
   
   <div class="navbar-end">
-    {% if(req.auth == undefined) %}
+    {% if(req.jwt.payload.user == undefined) %}
       <a class="btn btn-primary" href="/login">Login</a>
       <a class="btn btn-secondary" href="/register">Register</a>
     {% endif %}

@@ -4,12 +4,30 @@
   import axios from 'axios';
   let messages = [];
   let message = '';
+  let lastPoll = new Date().toISOString();
   onMount(() => {
     axios.get('http://localhost:3000/messages/').then(res => {
       messages=res.data;
       scrollToBottom();
     });
+    longPoll();
+
+
   });
+
+  function longPoll(){
+    axios.get('http://localhost:3000/messages/', {
+        params: {
+          from: lastPoll
+        }
+      }).then(res => {
+        messages = [...messages, ...res.data];
+        scrollToBottom();
+        lastPoll = new Date().toISOString();
+        longPoll();
+    });
+  }
+
   function scrollToBottom(){
     setTimeout(()=> {
         let chatBox = document.querySelector('#chat-box');
@@ -20,8 +38,8 @@
     axios.post('http://localhost:3000/messages/', {
       message: message
     }).then(res => {
-      messages = [...messages, res.data];
-      scrollToBottom();
+      // messages = [...messages, res.data];
+      // scrollToBottom();
     });
   }
 </script>
@@ -31,7 +49,7 @@
     <Message 
       isOwner={message.userId == 2}
       message={message.message}
-      name={message.userId}
+      name={message.user.name}
       time={message.timestamp}
       status="seen"></Message>
   {/each}

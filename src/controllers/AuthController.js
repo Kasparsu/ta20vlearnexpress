@@ -82,7 +82,7 @@ router.post('/2fa', async (req, res) => {
  * @todo move this to its own controller
  */
 router.get('/dashboard', jwt.valid(), (req, res) => {
-    return res.render('dashboard.njk', {email: req.auth});
+    return res.render('dashboard.njk', {email: req.jwt.payload.user.email});
     
 });
 
