@@ -86,6 +86,13 @@ router.get('/dashboard', jwt.valid(), (req, res) => {
     
 });
 
+/**  
+ * @todo move this to its own controller
+ */
+ router.get('/user', jwt.valid(), (req, res) => {
+    return res.json(req.jwt.payload.user);
+});
+
 
 router.get('/login', (req, res) => {
     return res.render('login.njk');

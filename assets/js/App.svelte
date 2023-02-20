@@ -4,28 +4,36 @@
   import axios from 'axios';
   let messages = [];
   let message = '';
-  let lastPoll = new Date().toISOString();
+  let socket = null;
+  let user = null;
   onMount(() => {
+    axios.get('http://localhost:3000/user/').then(res => {
+      user=res.data;
+    });
+
     axios.get('http://localhost:3000/messages/').then(res => {
       messages=res.data;
       scrollToBottom();
     });
-    longPoll();
+    
+        // Create WebSocket connection.
+    socket = new WebSocket('ws://localhost:8080');
 
+    // Connection opened
+    socket.addEventListener('open', onOpen);
 
+    // Listen for messages
+    socket.addEventListener('message', onMessage);
   });
 
-  function longPoll(){
-    axios.get('http://localhost:3000/messages/', {
-        params: {
-          from: lastPoll
-        }
-      }).then(res => {
-        messages = [...messages, ...res.data];
-        scrollToBottom();
-        lastPoll = new Date().toISOString();
-        longPoll();
-    });
+  function onOpen(event){
+    //socket.send('Hello Server!');
+  }
+
+  function onMessage(event){
+    console.log('Message from server ', event.data);
+    messages = [...messages, JSON.parse(event.data)];
+    scrollToBottom();
   }
 
   function scrollToBottom(){
@@ -35,11 +43,13 @@
       },0);     
   }
   function send(){
+    
     axios.post('http://localhost:3000/messages/', {
       message: message
     }).then(res => {
-      // messages = [...messages, res.data];
-      // scrollToBottom();
+      socket.send(JSON.stringify(res.data));
+      messages = [...messages, res.data];
+      scrollToBottom();
     });
   }
 </script>
@@ -47,7 +57,7 @@
 <div class="min-h-[80vh] max-h-[80vh] overflow-y-scroll" id="chat-box">
   {#each messages as message}
     <Message 
-      isOwner={message.userId == 2}
+      isOwner={message.userId == user.id}
       message={message.message}
       name={message.user.name}
       time={message.timestamp}
